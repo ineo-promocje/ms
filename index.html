@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Scalanie indeksów - promocje</title>
+<style id="pageStyle">
+  @page { size: A4 portrait; margin: 10mm; }
+</style>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f4f5f7;
+    color: #1f2430;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px 0;
+  }
+  .subtitle {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  #dateLine {
+    font-size: 40px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+  }
+  #dropzone {
+    border: 2px dashed #b7c0cc;
+    border-radius: 22px;
+    background: #fff;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 22px 20px;
+    text-align: center;
+    color: #556;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  }
+  #dropzone:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(59,130,246,0.12);
+    transform: translateY(-1px);
+  }
+  #dropzone .icon { font-size: 26px; margin-bottom: 6px; }
+  #dropzone .text { font-size: 13px; margin-bottom: 12px; }
+  #dropzone button {
+    font-size: 15px;
+    padding: 12px 28px;
+    border-radius: 10px;
+  }
+  .print-only { display: none; }
+  #dropzone.drag {
+    background: #eaf3ff;
+    border-color: #3b82f6;
+  }
+  #dropzone strong { color: #3b82f6; }
+  #fileInput { display: none; }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .toolbar .group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #dde1e7;
+    border-radius: 8px;
+    padding: 6px 10px;
+  }
+  .toolbar label { font-size: 13px; cursor: pointer; }
+  button {
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #3b82f6;
+    background: #3b82f6;
+    color: #fff;
+    cursor: pointer;
+  }
+  button.secondary {
+    background: #fff;
+    color: #3b82f6;
+  }
+  button:hover { opacity: 0.9; }
+  input[type="text"] {
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #dde1e7;
+    min-width: 220px;
+  }
+  #summary {
+    font-size: 13px;
+    color: #444;
+  }
+  #summary b { color: #1f2430; }
+
+  #tableWrap {
+    background: #fff;
+    border-radius: 10px;
+    padding: 6px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12.5px;
+  }
+  col.idx   { width: 12%; }
+  col.name  { width: 42%; }
+  col.brand { width: 12%; }
+  col.price { width: 14%; }
+  col.stan  { width: 8%; }
+  col.podgrupa { width: 10%; }
+
+  th, td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #e2e5ea;
+    border-right: 1px solid #e2e5ea;
+    text-align: left;
+    vertical-align: top;
+    word-wrap: break-word;
+  }
+  th:last-child, td:last-child { border-right: none; }
+  thead th {
+    background: #eef1f5;
+    position: sticky;
+    top: 0;
+    border-bottom: 2px solid #c8cdd6;
+  }
+  th .th-sub {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: #777;
+    white-space: nowrap;
+  }
+  tbody tr:hover { background: #f7fbff; }
+  tr.price-increase {
+    background: #fff7ed;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  tr.price-increase:hover { background: #ffedd5; }
+  .up-arrow { font-size: 12px; }
+  td.num, th.num { text-align: right; }
+  td.detal, th.detal { font-weight: 700; }
+  td.stan, th.stan {
+    font-weight: 900;
+    font-size: 13.5px;
+    text-align: center;
+  }
+  .stan-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+  }
+  .stan-num {
+    text-align: right;
+    min-width: 16px;
+  }
+  .up-arrow {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    margin-left: 2px;
+    visibility: hidden;
+  }
+  .up-arrow.visible { visibility: visible; }
+
+  td.idx a {
+    color: inherit;
+    text-decoration: none;
+  }
+  td.idx a:hover { text-decoration: underline; }
+  td.idx .img-search {
+    margin-left: 4px;
+    font-size: 11px;
+    text-decoration: none;
+    opacity: 0.7;
+  }
+  td.idx .img-search:hover { opacity: 1; }
+
+  #empty {
+    text-align: center;
+    color: #888;
+    padding: 30px;
+    font-size: 13px;
+  }
+  .howto {
+    padding: 20px 10px 30px;
+    text-align: center;
+  }
+  .howto h3 {
+    font-size: 17px;
+    color: #1f2430;
+    margin: 0 0 20px 0;
+  }
+  .howto-steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 4px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .howto-step {
+    background: #f7f9fc;
+    border: 1px solid #e2e5ea;
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 190px;
+    font-size: 12.5px;
+    color: #444;
+    text-align: left;
+    line-height: 1.4;
+  }
+  .howto-step b {
+    display: block;
+    color: #3b82f6;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .howto-arrow {
+    display: flex;
+    align-items: center;
+    color: #b7c0cc;
+    font-size: 22px;
+    padding: 0 2px;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    #dropzone, .toolbar, .subtitle, .no-print, #dateLine { display: none !important; }
+    .print-only { display: block !important; }
+    #tableWrap { padding: 0; }
+    table { font-size: 10.5px; }
+    td.stan, th.stan { font-size: 11.5px; }
+    th, td { padding: 4px 5px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="dateLine" style="text-align:center;">Scalanie indeksów z pliku promocji z dnia <span id="genDate"></span></div>
+<div id="printDateLine" class="print-only" style="text-align:center;">Promocje z dnia <span id="genDatePrint"></span></div>
+<div class="toolbar no-print" style="margin-top:-6px; margin-bottom:10px; justify-content:center; text-align:center;">
+  <div class="group">
+    <label for="dateInput" style="font-size:13px;">Data promocji:</label>
+    <input type="date" id="dateInput">
+  </div>
+  <div style="font-size:12px; color:#888; max-width:340px; text-align:center;">
+    Datę można zmienić, jeśli promocje są scalane z innego dnia niż dzisiejszy - pole jest czysto informacyjne i zmienia się również na wydruku.
+  </div>
+</div>
+<div class="subtitle no-print" style="margin-top:20px; margin-bottom:20px; text-align:center;">
+  ℹ️ Przy druku / zapisie do PDF odznacz w oknie drukowania opcję <b>„Nagłówki i stopki”</b><br>- inaczej przeglądarka doda własną datę i ścieżkę pliku na górze i dole strony.
+</div>
+
+<div id="dropzone">
+  <div class="icon">📄</div>
+  <div class="text">Przeciągnij tutaj plik CSV</div>
+  <button type="button" id="btnChooseFile">Wybierz plik CSV</button>
+  <input type="file" id="fileInput" accept=".csv">
+</div>
+<div class="subtitle" style="margin-top:14px; text-align:center;">⬆️ Przy stanie indeksu oznacza, że na tym indeksie jest podwyższenie ceny.<br>❗ BackOffice w kolumnie <b>Aktualna Cena RRP</b> podaje cenę pierwotną, a nie cenę przed obniżką.<br>Nie można więc stwierdzić, które indeksy na 100% są podwyższeniem.</div>
+
+<div class="toolbar no-print" id="toolbar" style="display:none;">
+  <div class="group">
+    <button id="btnDownload">⬇️ Pobierz scalony CSV</button>
+  </div>
+  <div class="group">
+    <button id="btnPrint" class="secondary">🖨️ Drukuj / PDF</button>
+  </div>
+  <div class="group">
+    <label style="font-size:13px;"><input type="radio" name="orient" value="portrait" checked> Pion</label>
+    <label style="font-size:13px;"><input type="radio" name="orient" value="landscape"> Poziom</label>
+  </div>
+  <div class="group">
+    <label for="sortSelect" style="font-size:13px;">Sortuj wg:</label>
+    <select id="sortSelect">
+      <option value="default">Kolejność z pliku</option>
+      <option value="idx">Indeksu</option>
+      <option value="name">Nazwy produktu</option>
+      <option value="podgrupa" id="sortPodgrupaOption">Podgrupy</option>
+      <option value="price">Ceny po obniżce</option>
+    </select>
+  </div>
+  <div id="summary"></div>
+</div>
+
+<div id="tableWrap">
+  <div id="empty">
+    <div class="howto">
+      <h3>Generowanie pliku .csv</h3>
+      <div class="howto-steps">
+        <div class="howto-step"><b>Krok 1</b>W programie BackOffice wejdź w zakładkę PRODUKTY → PRZECENY.</div>
+        <div class="howto-arrow">➜</div>
+        <div class="howto-step"><b>Krok 2</b>Kliknij dwukrotnie na promocje z danego dnia, a następnie z lewego menu wybierz PRODUKTY.</div>
+        <div class="howto-arrow">➜</div>
+        <div class="howto-step"><b>Krok 3</b>W kolumnie STAN można wybrać filtr „Różny od 0". Jeśli tego nie zrobimy, plik do scalania stanów i tak usunie stany 0.</div>
+        <div class="howto-arrow">➜</div>
+        <div class="howto-step"><b>Krok 4</b>Kliknij prawym przyciskiem myszki w dowolnym miejscu i wybierz „EKSPORTUJ DO .CSV". Tak zapisany plik należy wgrać wyżej.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="no-print" style="text-align:center; font-size:11px; color:#aaa; margin-top:24px;">Wykonanie: M415 Jasło</div>
+
+<script>
+let mergedRows = []; // {idx, name, brand, podgrupa, priceRRP, priceDetal, stan}
+let skippedZeroCount = 0;
+let hasPodgrupa = false;
+let currentSort = 'default';
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const btnChooseFile = document.getElementById('btnChooseFile');
+const toolbar = document.getElementById('toolbar');
+const tableWrap = document.getElementById('tableWrap');
+const summaryEl = document.getElementById('summary');
+const pageStyle = document.getElementById('pageStyle');
+
+btnChooseFile.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+document.getElementById('btnPrint').addEventListener('click', () => window.print());
+document.getElementById('btnDownload').addEventListener('click', downloadCSV);
+document.querySelectorAll('input[name="orient"]').forEach(r => {
+  r.addEventListener('change', e => {
+    pageStyle.textContent = `@page { size: A4 ${e.target.value}; margin: 10mm; }`;
+  });
+});
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  currentSort = e.target.value;
+  renderTable();
+});
+
+function sortedRows() {
+  if (currentSort === 'default') return mergedRows;
+  const arr = mergedRows.slice();
+  if (currentSort === 'idx') {
+    arr.sort((a, b) => a.idx.localeCompare(b.idx, 'pl', { numeric: true, sensitivity: 'base' }));
+  } else if (currentSort === 'name') {
+    arr.sort((a, b) => a.name.localeCompare(b.name, 'pl', { sensitivity: 'base' }));
+  } else if (currentSort === 'podgrupa') {
+    arr.sort((a, b) => {
+      if (!a.podgrupa && !b.podgrupa) return 0;
+      if (!a.podgrupa) return 1;
+      if (!b.podgrupa) return -1;
+      return a.podgrupa.localeCompare(b.podgrupa, 'pl', { sensitivity: 'base' });
+    });
+  } else if (currentSort === 'price') {
+    arr.sort((a, b) => {
+      const pa = parsePriceNumber(a.priceDetal);
+      const pb = parsePriceNumber(b.priceDetal);
+      if (pa === null && pb === null) return 0;
+      if (pa === null) return 1;
+      if (pb === null) return -1;
+      return pa - pb;
+    });
+  }
+  return arr;
+}
+
+// Data promocji: domyślnie dzisiejsza data z komputera, edytowalna przed drukiem
+const dateInput = document.getElementById('dateInput');
+const genDateEl = document.getElementById('genDate');
+const genDatePrintEl = document.getElementById('genDatePrint');
+
+function formatDatePL(dateStr) {
+  // dateStr w formacie YYYY-MM-DD (z <input type="date">)
+  const [y, m, d] = dateStr.split('-');
+  return `${d}.${m}.${y}`;
+}
+
+function todayISO() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+(function initDate() {
+  const iso = todayISO();
+  dateInput.value = iso;
+  const formatted = formatDatePL(iso);
+  genDateEl.textContent = formatted;
+  genDatePrintEl.textContent = formatted;
+})();
+
+dateInput.addEventListener('change', () => {
+  if (dateInput.value) {
+    const formatted = formatDatePL(dateInput.value);
+    genDateEl.textContent = formatted;
+    genDatePrintEl.textContent = formatted;
+  }
+});
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const text = e.target.result;
+      const rows = parseCSV(text);
+      mergedRows = mergeRows(rows);
+      currentSort = hasPodgrupa ? 'podgrupa' : 'default';
+      document.getElementById('sortSelect').value = currentSort;
+      document.getElementById('sortPodgrupaOption').hidden = !hasPodgrupa;
+      renderTable();
+      toolbar.style.display = 'flex';
+    } catch (err) {
+      alert('Nie udało się wczytać pliku: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// --- CSV parsing (semicolon-delimited, handles quoted fields, BOM, CRLF) ---
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, ''); // strip BOM
+  const lines = text.split(/\r\n|\n|\r/).filter(l => l.length > 0);
+  if (lines.length === 0) return [];
+
+  const parseLine = (line) => {
+    const out = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (line[i + 1] === '"') { cur += '"'; i++; }
+          else inQuotes = false;
+        } else cur += ch;
+      } else {
+        if (ch === '"') inQuotes = true;
+        else if (ch === ';') { out.push(cur); cur = ''; }
+        else cur += ch;
+      }
+    }
+    out.push(cur);
+    return out.map(s => s.trim());
+  };
+
+  const header = parseLine(lines[0]).map(h => h.toLowerCase());
+  const idxNazwa = header.findIndex(h => h.includes('nazwa'));
+  const idxMarka = header.findIndex(h => h.includes('marka'));
+  const idxStan = header.findIndex(h => h.includes('stan'));
+  const idxRRP = header.findIndex(h => h.includes('rrp') || h.includes('aktualna'));
+  const idxDetal = header.findIndex(h => h.includes('obni') || h.includes('detal'));
+  const idxPodgrupa = header.findIndex(h => h.includes('podgrupa'));
+  hasPodgrupa = idxPodgrupa !== -1;
+
+  // First pass: naive split (indeks = pierwszy token, restName = reszta) dla każdego wiersza
+  const parsedLines = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseLine(lines[i]);
+    if (cols.length < 2) continue;
+    const fullName = (cols[idxNazwa] || '').trim();
+    if (!fullName) continue;
+    const firstSpace = fullName.indexOf(' ');
+    const indeks = firstSpace === -1 ? fullName : fullName.slice(0, firstSpace);
+    const restName = firstSpace === -1 ? '' : fullName.slice(firstSpace + 1).trim();
+    parsedLines.push({ cols, indeks, restName });
+  }
+
+  // Zbieramy statystykę: jakie słowo pojawia się "na pozycji kategorii" (czyli zaraz po
+  // indeksie, a jeśli ten pierwszy człon zawiera "/", to zaraz po nim) w całym pliku.
+  // Słowa kategorii (CZEPEK, STRÓJ, OKULARKI...) powtarzają się dziesiątki razy,
+  // natomiast fragmenty indeksu z ukośnikiem (np. "V/VIBR ORAN") są unikalne dla wiersza.
+  const categoryWordFreq = new Map();
+  for (const p of parsedLines) {
+    if (!p.restName) continue;
+    const tokens = p.restName.split(/\s+/);
+    const candidate = tokens[0].includes('/') ? tokens[1] : tokens[0];
+    if (candidate) categoryWordFreq.set(candidate, (categoryWordFreq.get(candidate) || 0) + 1);
+  }
+
+  const rows = [];
+  for (const p of parsedLines) {
+    let indeks = p.indeks;
+    let restName = p.restName;
+    if (restName) {
+      const tokens = restName.split(/\s+/);
+      // Jeśli zaraz po indeksie jest token z "/" (np. "V/VIBR", "SHO/GR"), to prawie na pewno
+      // jest to dalsza część indeksu (kod koloru) - w nazwach produktów "/" praktycznie się nie zdarza.
+      if (tokens[0].includes('/')) {
+        indeks += ' ' + tokens[0];
+        tokens.shift();
+        // Sprawdzamy kolejne słowo: jeśli jest rzadkie w całym pliku (występuje tylko
+        // w tym jednym wierszu), to też dokładamy je do indeksu - inaczej zostawiamy
+        // jako początek nazwy produktu (bo to najpewniej słowo-kategoria typu CZEPEK/STRÓJ).
+        if (tokens[0] && (categoryWordFreq.get(tokens[0]) || 0) <= 1) {
+          indeks += ' ' + tokens[0];
+          tokens.shift();
+        }
+        restName = tokens.join(' ');
+      }
+    }
+    rows.push({
+      indeks: indeks,
+      restName: restName,
+      brand: idxMarka !== -1 ? (p.cols[idxMarka] || '') : '',
+      podgrupa: idxPodgrupa !== -1 ? (p.cols[idxPodgrupa] || '') : '',
+      stan: idxStan !== -1 ? parseInt((p.cols[idxStan] || '0').replace(/[^\d-]/g, ''), 10) || 0 : 0,
+      priceRRP: idxRRP !== -1 ? (p.cols[idxRRP] || '') : '',
+      priceDetal: idxDetal !== -1 ? (p.cols[idxDetal] || '') : ''
+    });
+  }
+  return rows;
+}
+
+// Usuwa z nazwy produktu fragment, który powiela podaną wartość (np. markę lub podgrupę)
+// (np. nazwa "PUMA COURT CLASSIC CLEAN 43 BIAŁY" + marka "PUMA" -> "COURT CLASSIC CLEAN 43 BIAŁY")
+function stripFromName(name, value) {
+  if (!name || !value) return name;
+  const escaped = value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  if (!escaped) return name;
+  const re = new RegExp('(^|\\s)' + escaped + '(?=\\s|$)', 'i');
+  const stripped = name.replace(re, '$1').replace(/\s{2,}/g, ' ').trim();
+  return stripped.length > 0 ? stripped : name;
+}
+
+// --- Merge rows by index, sum stan, collapse name (drop varying size tokens) ---
+function mergeRows(rows) {
+  const groups = new Map();
+  const order = [];
+  for (const r of rows) {
+    if (!groups.has(r.indeks)) {
+      groups.set(r.indeks, []);
+      order.push(r.indeks);
+    }
+    groups.get(r.indeks).push(r);
+  }
+
+  const result = [];
+  for (const idx of order) {
+    const group = groups.get(idx);
+    const names = group.map(g => g.restName).filter(n => n.length > 0);
+    let mergedName = collapseName(names);
+    const stanTotal = group.reduce((sum, g) => sum + (g.stan || 0), 0);
+    const brand = group.find(g => g.brand)?.brand || '';
+    const podgrupa = group.find(g => g.podgrupa)?.podgrupa || '';
+    const priceRRP = group.find(g => g.priceRRP)?.priceRRP || '';
+    const priceDetal = group.find(g => g.priceDetal)?.priceDetal || '';
+    mergedName = stripFromName(mergedName, podgrupa);
+    mergedName = stripFromName(mergedName, brand);
+    result.push({
+      idx: idx,
+      name: mergedName,
+      brand: brand,
+      podgrupa: podgrupa,
+      priceRRP: priceRRP,
+      priceDetal: priceDetal,
+      stan: stanTotal
+    });
+  }
+  // Pomijamy indeksy, które po zsumowaniu mają stan 0 (albo puste pole "Stan")
+  const kept = result.filter(r => r.stan > 0);
+  skippedZeroCount = result.length - kept.length;
+  return kept;
+}
+
+// Drop tokens that differ between size-variants (e.g. size numbers),
+// keep tokens common to all variants (prefix + suffix), so "38 CZARNY" / "40 CZARNY" -> "CZARNY"
+function collapseName(names) {
+  if (names.length === 0) return '';
+  if (names.length === 1) return names[0];
+
+  const tokenLists = names.map(n => n.split(/\s+/));
+  const minLen = Math.min(...tokenLists.map(t => t.length));
+
+  let prefixLen = 0;
+  for (let i = 0; i < minLen; i++) {
+    const tok = tokenLists[0][i];
+    if (tokenLists.every(t => t[i] === tok)) prefixLen++;
+    else break;
+  }
+
+  let suffixLen = 0;
+  for (let i = 1; i <= minLen - prefixLen; i++) {
+    const tok = tokenLists[0][tokenLists[0].length - i];
+    if (tokenLists.every(t => t[t.length - i] === tok)) suffixLen++;
+    else break;
+  }
+
+  const prefixTokens = tokenLists[0].slice(0, prefixLen);
+  const suffixTokens = suffixLen > 0 ? tokenLists[0].slice(tokenLists[0].length - suffixLen) : [];
+  const merged = prefixTokens.concat(suffixTokens).join(' ').trim();
+  return merged.length > 0 ? merged : names[0];
+}
+
+// --- Render ---
+function normalizePrice(p) {
+  return String(p).replace(/\s+/g, '').toLowerCase();
+}
+
+function parsePriceNumber(p) {
+  if (!p) return null;
+  const cleaned = String(p).replace(/[^\d,.-]/g, '').replace(',', '.');
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
+}
+
+function isPriceIncrease(r) {
+  const rrp = parsePriceNumber(r.priceRRP);
+  const detal = parsePriceNumber(r.priceDetal);
+  if (rrp === null || detal === null) return false;
+  return detal >= rrp;
+}
+
+function googleImagesUrl(idx, brand) {
+  const q = brand ? (idx + ' ' + brand) : idx;
+  return 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(q);
+}
+
+function renderTable() {
+  if (mergedRows.length === 0) {
+    tableWrap.innerHTML = '<div id="empty">Brak danych do wyświetlenia.</div>';
+    return;
+  }
+  const rowsToShow = sortedRows();
+
+  summaryEl.innerHTML = `Scalono do <b>${mergedRows.length}</b> indeksów` +
+    ` &middot; suma stanu: <b>${mergedRows.reduce((s, r) => s + r.stan, 0)}</b>` +
+    (skippedZeroCount > 0 ? ` &middot; pominięto <b>${skippedZeroCount}</b> indeksów ze stanem 0` : '');
+
+  let html = '<table><colgroup>' +
+    (hasPodgrupa
+      ? '<col class="idx" style="width:11%"><col class="podgrupa" style="width:10%"><col class="name" style="width:33%"><col class="brand" style="width:13%"><col class="price" style="width:13%"><col class="price" style="width:13%"><col class="stan" style="width:7%">'
+      : '<col class="idx"><col class="name"><col class="brand"><col class="price"><col class="price"><col class="stan">') +
+    '</colgroup><thead><tr>' +
+    '<th>Indeks</th>' +
+    (hasPodgrupa ? '<th>Podgrupa</th>' : '') +
+    '<th>Nazwa produktu</th><th>Marka</th>' +
+    '<th class="num">Aktualna Cena RRP<span class="th-sub">(Pierwotna)</span></th><th class="num detal">Obniżona Cena Detal</th><th class="stan">Stan</th>' +
+    '</tr></thead><tbody>';
+
+  for (const r of rowsToShow) {
+    const isIncrease = isPriceIncrease(r);
+    html += `<tr${isIncrease ? ' class="price-increase"' : ''}>
+      <td class="idx">${escapeHtml(r.idx)}<a class="img-search no-print" href="${googleImagesUrl(r.idx, r.brand)}" target="_blank" rel="noopener">🔍</a></td>
+      ${hasPodgrupa ? `<td>${escapeHtml(r.podgrupa)}</td>` : ''}
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.brand)}</td>
+      <td class="num">${escapeHtml(r.priceRRP)}</td>
+      <td class="num detal">${escapeHtml(r.priceDetal)}</td>
+      <td class="stan"><span class="stan-wrap"><span class="stan-num">${r.stan}</span><span class="up-arrow${isIncrease ? ' visible' : ''}" title="Cena obniżona jest taka sama lub wyższa niż cena aktualna - to podwyżka ceny, do zrobienia w pierwszej kolejności">⬆️</span></span></td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  tableWrap.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// --- Export merged CSV (semicolon-delimited, UTF-8 BOM, CRLF - LibreOffice friendly) ---
+function downloadCSV() {
+  if (mergedRows.length === 0) return;
+  const header = hasPodgrupa
+    ? ['Indeks', 'Podgrupa', 'Nazwa produktu', 'Marka', 'Aktualna Cena RRP', 'Obniżona Cena Detal', 'Stan', 'Podwyżka']
+    : ['Indeks', 'Nazwa produktu', 'Marka', 'Aktualna Cena RRP', 'Obniżona Cena Detal', 'Stan', 'Podwyżka'];
+  const lines = [header.join(';')];
+  for (const r of sortedRows()) {
+    const isIncrease = isPriceIncrease(r);
+    const row = hasPodgrupa
+      ? [r.idx, r.podgrupa, r.name, r.brand, r.priceRRP, r.priceDetal, r.stan, isIncrease ? 'TAK' : '']
+      : [r.idx, r.name, r.brand, r.priceRRP, r.priceDetal, r.stan, isIncrease ? 'TAK' : ''];
+    lines.push(row.map(csvEscape).join(';'));
+  }
+  const csvContent = '\uFEFF' + lines.join('\r\n') + '\r\n';
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'scalony_' + timestamp() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(val) {
+  const s = String(val);
+  if (s.includes(';') || s.includes('"') || s.includes('\n')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function timestamp() {
+  const d = new Date();
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
+}
+</script>
+</body>
+</html>
