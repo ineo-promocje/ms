@@ -8,6 +8,7 @@
 </style>
 <style>
   * { box-sizing: border-box; }
+  .shell { max-width: 1700px; margin: 0 auto; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
@@ -67,6 +68,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 14px;
     margin: 16px 0;
   }
@@ -127,7 +129,7 @@
   col.podgrupa { width: 10%; }
 
   th, td {
-    padding: 6px 8px;
+    padding: 4px 8px;
     border-bottom: 1px solid #e2e5ea;
     border-right: 1px solid #e2e5ea;
     text-align: left;
@@ -267,6 +269,7 @@
 </head>
 <body>
 
+<div class="shell">
 <div id="dateLine" style="text-align:center;">Scalanie indeksów z pliku promocji z dnia <span id="genDate"></span></div>
 <div id="printDateLine" class="print-only" style="text-align:center;">Promocje z dnia <span id="genDatePrint"></span></div>
 <div class="toolbar no-print" style="margin-top:-6px; margin-bottom:10px; justify-content:center; text-align:center;">
@@ -332,6 +335,7 @@
 </div>
 
 <div class="no-print" style="text-align:center; font-size:11px; color:#aaa; margin-top:24px;">Wykonanie: M415 Jasło</div>
+</div>
 
 <script>
 let mergedRows = []; // {idx, name, brand, podgrupa, priceRRP, priceDetal, stan}
@@ -662,8 +666,8 @@ function renderTable() {
 
   let html = '<table><colgroup>' +
     (hasPodgrupa
-      ? '<col class="lp"><col class="idx" style="width:10%"><col class="podgrupa" style="width:10%"><col class="name" style="width:34%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">'
-      : '<col class="lp"><col class="idx" style="width:11%"><col class="name" style="width:43%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">') +
+      ? '<col class="lp"><col class="idx" style="width:13%"><col class="podgrupa" style="width:10%"><col class="name" style="width:31%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">'
+      : '<col class="lp"><col class="idx" style="width:14%"><col class="name" style="width:40%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">') +
     '</colgroup><thead><tr>' +
     '<th class="lp">Lp.</th><th>Indeks</th>' +
     (hasPodgrupa ? '<th>Podgrupa</th>' : '') +
