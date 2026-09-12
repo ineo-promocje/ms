@@ -148,6 +148,14 @@
     color: #777;
     white-space: nowrap;
   }
+  td.lp, th.lp {
+    color: #555;
+    text-align: right;
+  }
+  col.lp { width: 4%; }
+  @media screen {
+    col.lp { width: 30px; }
+  }
   tbody tr:hover { background: #f7fbff; }
   tr.price-increase {
     background: #fff7ed;
@@ -168,10 +176,12 @@
     align-items: center;
     justify-content: center;
     width: 34px;
+    white-space: nowrap;
   }
   .stan-num {
     text-align: right;
     min-width: 16px;
+    white-space: nowrap;
   }
   .up-arrow {
     display: inline-block;
@@ -652,18 +662,21 @@ function renderTable() {
 
   let html = '<table><colgroup>' +
     (hasPodgrupa
-      ? '<col class="idx" style="width:11%"><col class="podgrupa" style="width:10%"><col class="name" style="width:33%"><col class="brand" style="width:13%"><col class="price" style="width:13%"><col class="price" style="width:13%"><col class="stan" style="width:7%">'
-      : '<col class="idx"><col class="name"><col class="brand"><col class="price"><col class="price"><col class="stan">') +
+      ? '<col class="lp"><col class="idx" style="width:10%"><col class="podgrupa" style="width:10%"><col class="name" style="width:34%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">'
+      : '<col class="lp"><col class="idx" style="width:11%"><col class="name" style="width:43%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">') +
     '</colgroup><thead><tr>' +
-    '<th>Indeks</th>' +
+    '<th class="lp">Lp.</th><th>Indeks</th>' +
     (hasPodgrupa ? '<th>Podgrupa</th>' : '') +
     '<th>Nazwa produktu</th><th>Marka</th>' +
     '<th class="num">Aktualna Cena RRP<span class="th-sub">(Pierwotna)</span></th><th class="num detal">Obniżona Cena Detal</th><th class="stan">Stan</th>' +
     '</tr></thead><tbody>';
 
+  let rowNum = 0;
   for (const r of rowsToShow) {
+    rowNum++;
     const isIncrease = isPriceIncrease(r);
     html += `<tr${isIncrease ? ' class="price-increase"' : ''}>
+      <td class="lp">${rowNum}</td>
       <td class="idx">${escapeHtml(r.idx)}<a class="img-search no-print" href="${googleImagesUrl(r.idx, r.brand)}" target="_blank" rel="noopener">🔍</a></td>
       ${hasPodgrupa ? `<td>${escapeHtml(r.podgrupa)}</td>` : ''}
       <td>${escapeHtml(r.name)}</td>
