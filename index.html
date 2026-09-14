@@ -8,7 +8,6 @@
 </style>
 <style>
   * { box-sizing: border-box; }
-  .shell { max-width: 1700px; margin: 0 auto; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
@@ -68,7 +67,6 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
     gap: 14px;
     margin: 16px 0;
   }
@@ -129,7 +127,7 @@
   col.podgrupa { width: 10%; }
 
   th, td {
-    padding: 4px 8px;
+    padding: 6px 8px;
     border-bottom: 1px solid #e2e5ea;
     border-right: 1px solid #e2e5ea;
     text-align: left;
@@ -257,19 +255,24 @@
   }
 
   @media print {
-    body { background: #fff; padding: 0; }
+    body { background: #fff; padding: 0; color: #000; }
     #dropzone, .toolbar, .subtitle, .no-print, #dateLine { display: none !important; }
     .print-only { display: block !important; }
     #tableWrap { padding: 0; }
-    table { font-size: 10.5px; }
-    td.stan, th.stan { font-size: 11.5px; }
-    th, td { padding: 4px 5px; }
+    table { font-size: 11.5px; }
+    td.stan, th.stan { font-size: 12.5px; }
+    th, td { padding: 4px 5px; color: #000; }
+    tr.price-increase { background: #fff !important; }
+    tbody tr:nth-child(even) {
+      background: #f6f6f6 !important;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
   }
 </style>
 </head>
 <body>
 
-<div class="shell">
 <div id="dateLine" style="text-align:center;">Scalanie indeksów z pliku promocji z dnia <span id="genDate"></span></div>
 <div id="printDateLine" class="print-only" style="text-align:center;">Promocje z dnia <span id="genDatePrint"></span></div>
 <div class="toolbar no-print" style="margin-top:-6px; margin-bottom:10px; justify-content:center; text-align:center;">
@@ -291,7 +294,10 @@
   <button type="button" id="btnChooseFile">Wybierz plik CSV</button>
   <input type="file" id="fileInput" accept=".csv">
 </div>
-<div class="subtitle" style="margin-top:14px; text-align:center;">⬆️ Przy stanie indeksu oznacza, że na tym indeksie jest podwyższenie ceny.<br>❗ BackOffice w kolumnie <b>Aktualna Cena RRP</b> podaje cenę pierwotną, a nie cenę przed obniżką.<br>Nie można więc stwierdzić, które indeksy na 100% są podwyższeniem.</div>
+<div class="subtitle" style="margin-top:14px; text-align:center;">
+  <div>▲ Przy stanie indeksu oznacza, że na tym indeksie jest podwyższenie ceny.</div>
+  <div style="margin-top:10px;">❗ BackOffice w kolumnie <b>Aktualna Cena RRP</b> podaje cenę pierwotną, a nie cenę przed obniżką.<br>Nie można więc stwierdzić, które indeksy na 100% są podwyższeniem.</div>
+</div>
 
 <div class="toolbar no-print" id="toolbar" style="display:none;">
   <div class="group">
@@ -334,8 +340,7 @@
   </div>
 </div>
 
-<div class="no-print" style="text-align:center; font-size:11px; color:#aaa; margin-top:24px;"></div>
-</div>
+<div class="no-print" style="text-align:center; font-size:11px; color:#aaa; margin-top:24px;">Wykonanie: M415 Jasło</div>
 
 <script>
 let mergedRows = []; // {idx, name, brand, podgrupa, priceRRP, priceDetal, stan}
@@ -687,7 +692,7 @@ function renderTable() {
       <td>${escapeHtml(r.brand)}</td>
       <td class="num">${escapeHtml(r.priceRRP)}</td>
       <td class="num detal">${escapeHtml(r.priceDetal)}</td>
-      <td class="stan"><span class="stan-wrap"><span class="stan-num">${r.stan}</span><span class="up-arrow${isIncrease ? ' visible' : ''}" title="Cena obniżona jest taka sama lub wyższa niż cena aktualna - to podwyżka ceny, do zrobienia w pierwszej kolejności">⬆️</span></span></td>
+      <td class="stan"><span class="stan-wrap"><span class="stan-num">${r.stan}</span><span class="up-arrow${isIncrease ? ' visible' : ''}" title="Cena obniżona jest taka sama lub wyższa niż cena aktualna - to podwyżka ceny, do zrobienia w pierwszej kolejności">▲</span></span></td>
     </tr>`;
   }
   html += '</tbody></table>';
