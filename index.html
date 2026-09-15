@@ -8,6 +8,7 @@
 </style>
 <style>
   * { box-sizing: border-box; }
+  .shell { max-width: 1400px; margin: 0 auto; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
@@ -67,6 +68,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: 14px;
     margin: 16px 0;
   }
@@ -273,6 +275,7 @@
 </head>
 <body>
 
+<div class="shell">
 <div id="dateLine" style="text-align:center;">Scalanie indeksów z pliku promocji z dnia <span id="genDate"></span></div>
 <div id="printDateLine" class="print-only" style="text-align:center;">Promocje z dnia <span id="genDatePrint"></span></div>
 <div class="toolbar no-print" style="margin-top:-6px; margin-bottom:10px; justify-content:center; text-align:center;">
@@ -341,6 +344,7 @@
 </div>
 
 <div class="no-print" style="text-align:center; font-size:11px; color:#aaa; margin-top:24px;">Wykonanie: M415 Jasło</div>
+</div>
 
 <script>
 let mergedRows = []; // {idx, name, brand, podgrupa, priceRRP, priceDetal, stan}
