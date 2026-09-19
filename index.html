@@ -393,10 +393,14 @@ function sortedRows() {
     arr.sort((a, b) => a.name.localeCompare(b.name, 'pl', { sensitivity: 'base' }));
   } else if (currentSort === 'podgrupa') {
     arr.sort((a, b) => {
-      if (!a.podgrupa && !b.podgrupa) return 0;
+      if (!a.podgrupa && !b.podgrupa) {
+        return a.brand.localeCompare(b.brand, 'pl', { sensitivity: 'base' });
+      }
       if (!a.podgrupa) return 1;
       if (!b.podgrupa) return -1;
-      return a.podgrupa.localeCompare(b.podgrupa, 'pl', { sensitivity: 'base' });
+      const cmp = a.podgrupa.localeCompare(b.podgrupa, 'pl', { sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+      return a.brand.localeCompare(b.brand, 'pl', { sensitivity: 'base' });
     });
   } else if (currentSort === 'price') {
     arr.sort((a, b) => {
