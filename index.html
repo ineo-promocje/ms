@@ -305,9 +305,6 @@
 
 <div class="toolbar no-print" id="toolbar" style="display:none;">
   <div class="group">
-    <button id="btnDownload">⬇️ Pobierz scalony CSV</button>
-  </div>
-  <div class="group">
     <button id="btnPrint" class="secondary">🖨️ Drukuj / PDF</button>
   </div>
   <div class="group">
@@ -374,7 +371,6 @@ fileInput.addEventListener('change', e => {
 });
 
 document.getElementById('btnPrint').addEventListener('click', () => window.print());
-document.getElementById('btnDownload').addEventListener('click', downloadCSV);
 document.querySelectorAll('input[name="orient"]').forEach(r => {
   r.addEventListener('change', e => {
     pageStyle.textContent = `@page { size: A4 ${e.target.value}; margin: 10mm; }`;
@@ -713,32 +709,6 @@ function escapeHtml(s) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-}
-
-// --- Export merged CSV (semicolon-delimited, UTF-8 BOM, CRLF - LibreOffice friendly) ---
-function downloadCSV() {
-  if (mergedRows.length === 0) return;
-  const header = hasPodgrupa
-    ? ['Indeks', 'Podgrupa', 'Nazwa produktu', 'Marka', 'Aktualna Cena RRP', 'Obniżona Cena Detal', 'Stan', 'Podwyżka']
-    : ['Indeks', 'Nazwa produktu', 'Marka', 'Aktualna Cena RRP', 'Obniżona Cena Detal', 'Stan', 'Podwyżka'];
-  const lines = [header.join(';')];
-  for (const r of sortedRows()) {
-    const isIncrease = isPriceIncrease(r);
-    const row = hasPodgrupa
-      ? [r.idx, r.podgrupa, r.name, r.brand, r.priceRRP, r.priceDetal, r.stan, isIncrease ? 'TAK' : '']
-      : [r.idx, r.name, r.brand, r.priceRRP, r.priceDetal, r.stan, isIncrease ? 'TAK' : ''];
-    lines.push(row.map(csvEscape).join(';'));
-  }
-  const csvContent = '\uFEFF' + lines.join('\r\n') + '\r\n';
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'scalony_' + timestamp() + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
 }
 
 function csvEscape(val) {
