@@ -8,12 +8,24 @@
 </style>
 <style>
   * { box-sizing: border-box; }
+  :root {
+    --bg: #e4e7ec;
+    --surface: #f8f9fb;
+    --border2: #cdd3dc;
+    --line: #d5dae2;
+    --thead: #e3e7ee;
+    --thead-line: #b5bdc9;
+    --hover: #eaf1fa;
+    --inc: #fbeedf;
+    --inc-hover: #f5e0c8;
+    --step: #eef1f6;
+  }
   .shell { max-width: 1400px; margin: 0 auto; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background: #f4f5f7;
+    background: var(--bg);
     color: #1f2430;
   }
   h1 {
@@ -34,7 +46,7 @@
   #dropzone {
     border: 2px dashed #b7c0cc;
     border-radius: 22px;
-    background: #fff;
+    background: var(--surface);
     max-width: 420px;
     margin: 0 auto;
     padding: 22px 20px;
@@ -76,8 +88,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: #fff;
-    border: 1px solid #dde1e7;
+    background: var(--surface);
+    border: 1px solid var(--border2);
     border-radius: 8px;
     padding: 6px 10px;
   }
@@ -92,7 +104,7 @@
     cursor: pointer;
   }
   button.secondary {
-    background: #fff;
+    background: var(--surface);
     color: #3b82f6;
   }
   button:hover { opacity: 0.9; }
@@ -110,7 +122,7 @@
   #summary b { color: #1f2430; }
 
   #tableWrap {
-    background: #fff;
+    background: var(--surface);
     border-radius: 10px;
     padding: 6px;
     overflow-x: auto;
@@ -130,18 +142,18 @@
 
   th, td {
     padding: 6px 8px;
-    border-bottom: 1px solid #e2e5ea;
-    border-right: 1px solid #e2e5ea;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
     text-align: left;
     vertical-align: top;
     word-wrap: break-word;
   }
   th:last-child, td:last-child { border-right: none; }
   thead th {
-    background: #eef1f5;
+    background: var(--thead);
     position: sticky;
     top: 0;
-    border-bottom: 2px solid #c8cdd6;
+    border-bottom: 2px solid var(--thead-line);
   }
   th .th-sub {
     display: block;
@@ -158,13 +170,13 @@
   @media screen {
     col.lp { width: 30px; }
   }
-  tbody tr:hover { background: #f7fbff; }
+  tbody tr:hover { background: var(--hover); }
   tr.price-increase {
-    background: #fff7ed;
+    background: var(--inc);
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
-  tr.price-increase:hover { background: #ffedd5; }
+  tr.price-increase:hover { background: var(--inc-hover); }
   .up-arrow { font-size: 12px; }
   td.num, th.num { text-align: right; }
   td.detal, th.detal { font-weight: 700; }
@@ -232,8 +244,8 @@
     margin: 0 auto;
   }
   .howto-step {
-    background: #f7f9fc;
-    border: 1px solid #e2e5ea;
+    background: var(--step);
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 12px 14px;
     width: 190px;
@@ -256,7 +268,42 @@
     padding: 0 2px;
   }
 
+
+  #tableWrap:empty { display: none; }
+  @media screen {
+    body { line-height: 1.5; padding: 24px; }
+    .shell { max-width: 1500px; }
+    #dateLine { font-size: 44px; line-height: 1.2; margin-bottom: 20px; }
+    .subtitle { font-size: 14.5px; line-height: 1.65; }
+    #dropzone { max-width: 460px; padding: 28px 24px; }
+    #dropzone .icon { font-size: 30px; }
+    #dropzone .text { font-size: 15px; margin-bottom: 14px; }
+    #dropzone button { font-size: 16px; padding: 13px 32px; }
+    .toolbar { gap: 16px; margin: 20px 0; }
+    .toolbar label { font-size: 14px; }
+    .toolbar .group { padding: 8px 12px; }
+    button { font-size: 14px; padding: 9px 16px; }
+    #summary { font-size: 14px; }
+    table { font-size: 13.5px; }
+    th, td { padding: 8px 9px; line-height: 1.45; }
+    th .th-sub { font-size: 10.5px; }
+    td.stan, th.stan { font-size: 14.5px; }
+    td.idx .img-search { font-size: 12px; }
+  }
+
   @media print {
+    :root {
+      --bg: #f4f5f7;
+      --surface: #fff;
+      --border2: #dde1e7;
+      --line: #e2e5ea;
+      --thead: #eef1f5;
+      --thead-line: #c8cdd6;
+      --hover: #f7fbff;
+      --inc: #fff7ed;
+      --inc-hover: #ffedd5;
+      --step: #f7f9fc;
+    }
     body { background: #fff; padding: 0; color: #000; }
     #dropzone, .toolbar, .subtitle, .no-print, #dateLine { display: none !important; }
     .print-only { display: block !important; }
@@ -281,10 +328,10 @@
 <div id="printDateLine" class="print-only" style="text-align:center;">Promocje z dnia <span id="genDatePrint"></span></div>
 <div class="toolbar no-print" style="margin-top:-6px; margin-bottom:10px; justify-content:center; text-align:center;">
   <div class="group">
-    <label for="dateInput" style="font-size:13px;">Data promocji:</label>
+    <label for="dateInput">Data promocji:</label>
     <input type="date" id="dateInput">
   </div>
-  <div style="font-size:12px; color:#888; max-width:340px; text-align:center;">
+  <div style="font-size:13px; color:#6b7280; max-width:380px; text-align:center;">
     Datę można zmienić, jeśli promocje są scalane z innego dnia niż dzisiejszy - pole jest czysto informacyjne i zmienia się również na wydruku.
   </div>
 </div>
@@ -308,11 +355,11 @@
     <button id="btnPrint" class="secondary">🖨️ Drukuj / PDF</button>
   </div>
   <div class="group">
-    <label style="font-size:13px;"><input type="radio" name="orient" value="portrait" checked> Pion</label>
-    <label style="font-size:13px;"><input type="radio" name="orient" value="landscape"> Poziom</label>
+    <label><input type="radio" name="orient" value="portrait" checked> Pion</label>
+    <label><input type="radio" name="orient" value="landscape"> Poziom</label>
   </div>
   <div class="group">
-    <label for="sortSelect" style="font-size:13px;">Sortuj wg:</label>
+    <label for="sortSelect">Sortuj wg:</label>
     <select id="sortSelect">
       <option value="default">Kolejność z pliku</option>
       <option value="idx">Indeksu</option>
@@ -324,24 +371,9 @@
   <div id="summary"></div>
 </div>
 
-<div id="tableWrap">
-  <div id="empty">
-    <div class="howto">
-      <h3>Generowanie pliku .csv</h3>
-      <div class="howto-steps">
-        <div class="howto-step"><b>Krok 1</b>W programie BackOffice wejdź w zakładkę PRODUKTY → PRZECENY.</div>
-        <div class="howto-arrow">➜</div>
-        <div class="howto-step"><b>Krok 2</b>Kliknij dwukrotnie na promocje z danego dnia, a następnie z lewego menu wybierz PRODUKTY.</div>
-        <div class="howto-arrow">➜</div>
-        <div class="howto-step"><b>Krok 3</b>W kolumnie STAN można wybrać filtr „Różny od 0". Jeśli tego nie zrobimy, plik do scalania stanów i tak usunie stany 0.</div>
-        <div class="howto-arrow">➜</div>
-        <div class="howto-step"><b>Krok 4</b>Kliknij prawym przyciskiem myszki w dowolnym miejscu i wybierz „EKSPORTUJ DO .CSV". Tak zapisany plik należy wgrać wyżej.</div>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="tableWrap"></div>
 
-<div class="no-print" style="text-align:center; font-size:11px; color:#aaa; margin-top:24px;">Wykonanie: M415 Jasło.<br>Wersja z dnia: 17.09.2026</div>
+<div class="no-print" style="text-align:center; font-size:12px; color:#7a8290; margin-top:28px;">Wykonanie: M415 Jasło.<br>Wersja z dnia: <b>22.10.2026</b></div>
 </div>
 
 <script>
@@ -676,7 +708,7 @@ function renderTable() {
 
   let html = '<table><colgroup>' +
     (hasPodgrupa
-      ? '<col class="lp"><col class="idx" style="width:13%"><col class="podgrupa" style="width:12%"><col class="name" style="width:31%"><col class="brand" style="width:13%"><col class="price" style="width:10%"><col class="price" style="width:10%"><col class="stan" style="width:7%">'
+      ? '<col class="lp"><col class="idx" style="width:13%"><col class="podgrupa" style="width:15.8%"><col class="name" style="width:28.4%"><col class="brand" style="width:11.8%"><col class="price" style="width:10%"><col class="price" style="width:10%"><col class="stan" style="width:7%">'
       : '<col class="lp"><col class="idx" style="width:14%"><col class="name" style="width:40%"><col class="brand" style="width:13%"><col class="price" style="width:11%"><col class="price" style="width:11%"><col class="stan" style="width:7%">') +
     '</colgroup><thead><tr>' +
     '<th class="lp">Lp.</th><th>Indeks</th>' +
