@@ -373,7 +373,7 @@
 
 <div id="tableWrap"></div>
 
-<div class="no-print" style="text-align:center; font-size:12px; color:#7a8290; margin-top:28px;">Wykonanie: M415 Jasło.<br>Wersja z dnia: <b>22.10.2026</b></div>
+<div class="no-print" style="text-align:center; font-size:12px; color:#7a8290; margin-top:28px;">Wykonanie: M415 Jasło.<br>Wersja z dnia: <b>28.10.2026</b></div>
 </div>
 
 <script>
@@ -532,6 +532,12 @@ function parseCSV(text) {
   const idxPodgrupa = header.findIndex(h => h.includes('podgrupa'));
   hasPodgrupa = idxPodgrupa !== -1;
 
+  // Normalizacja tokenu do porównań: usuwa polskie znaki diakrytyczne i zamienia na wielkie litery,
+  // żeby dopasowanie "RĘCZNIK" / "ręcznik" / drobne niespójności zapisu nadal się powiodło.
+  const normTok = (s) => String(s || '').toUpperCase()
+    .replace(/Ą/g,'A').replace(/Ć/g,'C').replace(/Ę/g,'E').replace(/Ł/g,'L')
+    .replace(/Ń/g,'N').replace(/Ó/g,'O').replace(/Ś/g,'S').replace(/Ź/g,'Z').replace(/Ż/g,'Z');
+
   // First pass: naive split (indeks = pierwszy token, restName = reszta) dla każdego wiersza
   const parsedLines = [];
   for (let i = 1; i < lines.length; i++) {
@@ -542,7 +548,8 @@ function parseCSV(text) {
     const firstSpace = fullName.indexOf(' ');
     const indeks = firstSpace === -1 ? fullName : fullName.slice(0, firstSpace);
     const restName = firstSpace === -1 ? '' : fullName.slice(firstSpace + 1).trim();
-    parsedLines.push({ cols, indeks, restName });
+    const rowPodgrupa = idxPodgrupa !== -1 ? (cols[idxPodgrupa] || '').trim() : '';
+    parsedLines.push({ cols, indeks, restName, rowPodgrupa });
   }
 
   // Zbieramy statystykę: jakie słowo pojawia się "na pozycji kategorii" (czyli zaraz po
@@ -563,14 +570,38 @@ function parseCSV(text) {
     let restName = p.restName;
     if (restName) {
       const tokens = restName.split(/\s+/);
-      // Jeśli zaraz po indeksie jest token z "/" (np. "V/VIBR", "SHO/GR"), to prawie na pewno
-      // jest to dalsza część indeksu (kod koloru) - w nazwach produktów "/" praktycznie się nie zdarza.
-      if (tokens[0].includes('/')) {
+      let matched = false;
+
+      // Metoda główna: w pliku "Nazwa produktu" ma strukturę
+      // INDEKS [opcjonalny kod, np. "GR M/S LI", "GREY MEL", "BL/CAP"] PODGRUPA MARKA ...
+      // Skoro znamy wartość Podgrupy z osobnej kolumny, szukamy jej dosłownie w tekście
+      // (jako sąsiadujące tokeny) - wszystko PRZED nią to w rzeczywistości dalsza część
+      // indeksu (kod koloru/rozmiaru), niezależnie czy zawiera "/" czy jest zwykłym słowem
+      // (np. angielskim skrótem koloru używanym przez Martes, Hi-Tec, AquaWave, Bejo, Elbrus, Brugi...).
+      if (p.rowPodgrupa) {
+        const podTokens = p.rowPodgrupa.split(/\s+/).map(normTok);
+        const maxStart = Math.min(tokens.length - podTokens.length, 6); // kod zwykle krótki, max kilka słów
+        for (let i = 0; i <= maxStart; i++) {
+          let ok = true;
+          for (let j = 0; j < podTokens.length; j++) {
+            if (normTok(tokens[i + j]) !== podTokens[j]) { ok = false; break; }
+          }
+          if (ok) {
+            if (i > 0) {
+              indeks += ' ' + tokens.slice(0, i).join(' ');
+              restName = tokens.slice(i).join(' ');
+            }
+            matched = true;
+            break;
+          }
+        }
+      }
+
+      // Zapasowa metoda (gdy brak kolumny Podgrupa albo nie udało się jej odnaleźć w tekście):
+      // dawna heurystyka po "/" i rzadkości słowa.
+      if (!matched && tokens[0].includes('/')) {
         indeks += ' ' + tokens[0];
         tokens.shift();
-        // Sprawdzamy kolejne słowo: jeśli jest rzadkie w całym pliku (występuje tylko
-        // w tym jednym wierszu), to też dokładamy je do indeksu - inaczej zostawiamy
-        // jako początek nazwy produktu (bo to najpewniej słowo-kategoria typu CZEPEK/STRÓJ).
         if (tokens[0] && (categoryWordFreq.get(tokens[0]) || 0) <= 1) {
           indeks += ' ' + tokens[0];
           tokens.shift();
@@ -582,7 +613,7 @@ function parseCSV(text) {
       indeks: indeks,
       restName: restName,
       brand: idxMarka !== -1 ? (p.cols[idxMarka] || '') : '',
-      podgrupa: idxPodgrupa !== -1 ? (p.cols[idxPodgrupa] || '') : '',
+      podgrupa: p.rowPodgrupa,
       stan: idxStan !== -1 ? parseInt((p.cols[idxStan] || '0').replace(/[^\d-]/g, ''), 10) || 0 : 0,
       priceRRP: idxRRP !== -1 ? (p.cols[idxRRP] || '') : '',
       priceDetal: idxDetal !== -1 ? (p.cols[idxDetal] || '') : ''
