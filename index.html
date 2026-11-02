@@ -721,6 +721,21 @@ function isPriceIncrease(r) {
   return detal >= rrp;
 }
 
+// Skraca wyświetlaną markę dla długich nazw, które jako pełny tekst rozciągają kolumnę
+// (zwłaszcza na wydruku). Pełna nazwa marki (r.brand) nie jest zmieniana - to dotyczy
+// tylko tego, co trafia do komórki tabeli (czyszczenie nazwy produktu i wyszukiwanie
+// obrazków nadal korzystają z pełnej, oryginalnej nazwy).
+function shortenBrand(brand) {
+  if (!brand) return brand;
+  const upper = brand.trim().toUpperCase();
+  if (upper === 'RUSSELL ATHLETIC') return 'RUSSELL ATH';
+  const tokens = brand.trim().split(/\s+/);
+  if (tokens.length > 1 && tokens[0].toUpperCase() === 'IQ') {
+    return 'IQ';
+  }
+  return brand;
+}
+
 function googleImagesUrl(idx, brand) {
   const q = brand ? (idx + ' ' + brand) : idx;
   return 'https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(q);
@@ -757,7 +772,7 @@ function renderTable() {
       <td class="idx">${escapeHtml(r.idx)}<a class="img-search no-print" href="${googleImagesUrl(r.idx, r.brand)}" target="_blank" rel="noopener">🔍</a></td>
       ${hasPodgrupa ? `<td>${escapeHtml(r.podgrupa)}</td>` : ''}
       <td>${escapeHtml(r.name)}</td>
-      <td>${escapeHtml(r.brand)}</td>
+      <td>${escapeHtml(shortenBrand(r.brand))}</td>
       <td class="num">${escapeHtml(r.priceRRP)}</td>
       <td class="num detal">${escapeHtml(r.priceDetal)}</td>
       <td class="stan"><span class="stan-wrap"><span class="stan-num">${r.stan}</span><span class="up-arrow${isIncrease ? ' visible' : ''}" title="Cena obniżona jest taka sama lub wyższa niż cena aktualna - to podwyżka ceny, do zrobienia w pierwszej kolejności">▲</span></span></td>
